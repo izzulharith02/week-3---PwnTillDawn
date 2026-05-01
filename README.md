@@ -36,7 +36,7 @@ gobuster dir -u http://<target-ip> -w /usr/share/wordlists/dirb/common.txt
 ```
 
 ### 📸 Gobuster Result
-![Gobuster](images/gobuster.png)
+![Gobuster](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/2f2d2dd10fa1dd6e9df2ce81d7d0ec0f18416878/pwntilldawn%205.png)
 
 ### Discovered Paths
 - /admin
