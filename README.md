@@ -74,26 +74,26 @@ Auth Plugin: mysql_native_password
 
 ### Screenshot — Nmap HTTP Info (Port 80)
 
-![nmap-http](pwntilldawn_18.png)
+![nmap-http](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%201.png)
 
 > Apache/2.4.46 (Win64), PHP/7.4.9, HTTP methods: GET HEAD POST OPTIONS  
 > Cookie `PHPSESSID` has `httponly` flag NOT set.
 
 ### Screenshot — MSSQL (Port 1433)
 
-![nmap-mssql](pwntilldawn_17.png)
+![nmap-mssql](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%202.png)
 
 > Microsoft SQL Server 2012 RTM, Service Pack Level: RTM, no post-SP patches applied.
 
 ### Screenshot — MariaDB (Port 3306)
 
-![nmap-mariadb](pwntilldawn_16.png)
+![nmap-mariadb](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%203.png)
 
 > MariaDB 5.5.5-10.4.14, SSL cert issued by `PwnDrive`.
 
 ### Screenshot — Higher RPC Ports
 
-![nmap-rpc](pwntilldawn_15.png)
+![nmap-rpc](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%204.png)
 
 > Ports 49152–49157 running Microsoft Windows RPC.
 
@@ -107,7 +107,7 @@ gobuster dir -u http://10.150.150.11 -w /usr/share/wordlists/dirb/common.txt
 
 ### Screenshot — Gobuster Results
 
-![gobuster](pwntilldawn_14.png)
+![gobuster](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%205.png)
 
 **Notable Directories Found:**
 
@@ -131,7 +131,7 @@ Navigating to `http://10.150.150.11/admin/` revealed an open directory listing:
 
 ### Screenshot — `/admin/` Index
 
-![admin-index](pwntilldawn_12.png)
+![admin-index](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%207.png)
 
 ```
 /admin/addedituser.php   2020-11-16  3.4K
@@ -349,7 +349,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=type+C:\Users\Administrator\Desktop\F
 
 ### Screenshot — Flag
 
-![flag](pwntilldawn_1.png)
+![flag](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%2018.png)
 
 ```
 PwnTillDawnAcademyIsAwesome!!!
