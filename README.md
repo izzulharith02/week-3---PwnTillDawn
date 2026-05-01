@@ -4,7 +4,6 @@
 > **Target IP:** `10.150.150.11`  
 > **Hostname:** `PwnDrive`  
 > **OS:** VM Kali Linux
-
 > **Difficulty:** Beginner–Intermediate  
 > **Flag:** `PwnTillDawnAcademyIsAwesome!!!`
 
