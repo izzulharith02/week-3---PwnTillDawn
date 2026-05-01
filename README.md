@@ -73,26 +73,26 @@ Auth Plugin: mysql_native_password
 
 ### Screenshot — Nmap HTTP Info (Port 80)
 
-![nmap-http](pwntilldawn_1.png)
+![nmap-http](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/e55e8ab19f9f31e94d827d309d73e0fb5ad4a280/pwntilldawn%201.png)
 
 > Apache/2.4.46 (Win64), PHP/7.4.9, HTTP methods: GET HEAD POST OPTIONS  
 > Cookie `PHPSESSID` has `httponly` flag NOT set.
 
 ### Screenshot — MSSQL (Port 1433)
 
-![nmap-mssql](pwntilldawn_2.png)
+![nmap-mssql](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/e55e8ab19f9f31e94d827d309d73e0fb5ad4a280/pwntilldawn%202.png)
 
 > Microsoft SQL Server 2012 RTM, Service Pack Level: RTM, no post-SP patches applied.
 
 ### Screenshot — MariaDB (Port 3306)
 
-![nmap-mariadb](pwntilldawn_3.png)
+![nmap-mariadb](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/e55e8ab19f9f31e94d827d309d73e0fb5ad4a280/pwntilldawn%203.png)
 
 > MariaDB 5.5.5-10.4.14, SSL cert issued by `PwnDrive`.
 
 ### Screenshot — Higher RPC Ports
 
-![nmap-rpc](pwntilldawn_4.png)
+![nmap-rpc](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/e55e8ab19f9f31e94d827d309d73e0fb5ad4a280/pwntilldawn%204.png)
 
 > Ports 49152–49157 running Microsoft Windows RPC.
 
@@ -106,7 +106,7 @@ gobuster dir -u http://10.150.150.11 -w /usr/share/wordlists/dirb/common.txt
 
 ### Screenshot — Gobuster Results
 
-![gobuster](pwntilldawn_5.png)
+![gobuster](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/e55e8ab19f9f31e94d827d309d73e0fb5ad4a280/pwntilldawn%205.png)
 
 **Notable Directories Found:**
 
@@ -130,7 +130,7 @@ Navigating to `http://10.150.150.11/admin/` revealed an open directory listing:
 
 ### Screenshot — `/admin/` Index
 
-![admin-index](pwntilldawn_7.png)
+![admin-index](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/e55e8ab19f9f31e94d827d309d73e0fb5ad4a280/pwntilldawn%207.png)
 
 ```
 /admin/addedituser.php   2020-11-16  3.4K
@@ -140,6 +140,21 @@ Navigating to `http://10.150.150.11/admin/` revealed an open directory listing:
 
 > ⚠️ Admin pages are accessible — no authentication on directory listing itself.
 
+## 👤 User Enumeration — Admin Panel
+
+Visiting `/admin/manageusers.php` reveals all existing user accounts:
+
+### Screenshot — Manage Users
+
+![manage-users](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/e55e8ab19f9f31e94d827d309d73e0fb5ad4a280/pwntilldawn%209.png)
+
+| Username | Role |
+|----------|------|
+| admin | admin |
+| Chris | user |
+| Linda | user |
+| testuser | admin |
+
 ---
 
 ## 👤 User Creation — Admin Panel
@@ -148,7 +163,7 @@ Visiting `/admin/addedituser.php` allows creating a new admin user with no prior
 
 ### Screenshot — Create User Form (`addedituser.php`)
 
-![create-user](pwntilldawn_8.png)
+![create-user](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/e55e8ab19f9f31e94d827d309d73e0fb5ad4a280/pwntilldawn%208.png)
 
 > Created a new user `testuser` with role `admin` via `/admin/addedituser.php`.
 
