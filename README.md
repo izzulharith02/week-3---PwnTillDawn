@@ -3,7 +3,7 @@
 > **Platform:** PwnTillDawn Academy  
 > **Target IP:** `10.150.150.11`  
 > **Hostname:** `PwnDrive`  
-> **OS:** Windows Server 2008 R2 / 2012  
+> **OS:** VM Kali Linux
 > **Difficulty:** Beginner–Intermediate  
 > **Flag:** `PwnTillDawnAcademyIsAwesome!!!`
 
