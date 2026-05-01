@@ -410,4 +410,4 @@ type FLAG1.txt ──► PwnTillDawnAcademyIsAwesome!!!
 | Outdated SQL Server (2012 RTM, no patches) | High | Port 1433 |
 
 
-*Writeup by: [Your Name] | Platform: PwnTillDawn Academy*
+*Writeup by: [Izzul Harith] | Platform: PwnTillDawn Academy*
